@@ -33,7 +33,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Log.i(TAG, "onCreate");
         h = new Handler();
-        h.postDelayed(r, 5000);
         mThread = new MyThread(TAG);
         mThread.start();
     }
@@ -46,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         Log.i(TAG, "onResume");
+        h.postDelayed(r, 5000);
     }
 
     protected void onPause() {
