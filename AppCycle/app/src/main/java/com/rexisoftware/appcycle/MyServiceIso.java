@@ -7,10 +7,12 @@ import android.util.Log;
 
 public class MyServiceIso extends Service {
     private final static String TAG = "myserviceiso";
-    private MyThread mThread;
+    private final MyThread mThread;
 
     public MyServiceIso() {
         Log.i(TAG, "MyServiceIso");
+        mThread = new MyThread(TAG);
+        mThread.start();
     }
 
     @Override
@@ -21,14 +23,16 @@ public class MyServiceIso extends Service {
 
     public void onCreate() {
         super.onCreate();
-        Log.i(TAG, "onCreate1");
-        mThread = new MyThread(TAG);
-        mThread.start();
-        Log.i(TAG, "onCreate2");
+        Log.i(TAG, "onCreate");
     }
 
     public int onStartCommand(Intent intent, int flags, int startId) {
+        super.onStartCommand(intent, flags, startId);
         Log.i(TAG, "MyService.onStartCommand: intent=" + intent.toString() + " flags=" + flags + " startId=" + startId);
+        String extra = intent.getStringExtra("rnd");
+        if (extra == null)
+            extra = "n/a";
+        Log.i(TAG, "extra=" + extra);
         return START_STICKY;
     }
 
