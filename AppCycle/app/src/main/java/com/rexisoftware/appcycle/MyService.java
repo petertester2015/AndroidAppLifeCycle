@@ -3,13 +3,30 @@ package com.rexisoftware.appcycle;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
+import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
+import android.os.Message;
+import android.os.Messenger;
 import android.util.Log;
 
 public class MyService extends Service {
     private final static String TAG = "myservice";
     private final MyThread mThread;
-    private final IBinder mBinder = new LocalBinder();
+
+    class IncomingHandler extends Handler {
+        @Override
+        public void handleMessage(Message msg) {
+            Log.i(TAG, "handleMessage=" + msg.toString());
+            Bundle bundle = msg.getData();
+            if (bundle!=null){
+                int x = bundle.getInt("counter");
+                Log.i(TAG, "counter=" +x);
+            }
+        }
+    }
+    final Messenger mMessenger = new Messenger(new IncomingHandler());
 
     public MyService() {
         Log.i(TAG, "MyService");
@@ -20,7 +37,7 @@ public class MyService extends Service {
     @Override
     public IBinder onBind(Intent intent) {
         Log.i(TAG, "onBind");
-        return mBinder;
+        return mMessenger.getBinder();
     }
 
     public void onCreate() {
@@ -41,18 +58,5 @@ public class MyService extends Service {
         super.onDestroy();
         Log.i(TAG, "onDestroy");
         mThread.shutdown();
-    }
-
-    public class LocalBinder extends MyServiceAPI {
-        MyService getService() {
-            Log.i(TAG, "LocalBinder.getService");
-            // Return this instance of LocalService so clients can call public methods.
-            return MyService.this;
-        }
-
-        @Override
-        public void report(String txt) {
-            Log.i(TAG, "received report: " + txt);
-        }
     }
 }

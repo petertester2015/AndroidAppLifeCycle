@@ -2,12 +2,28 @@ package com.rexisoftware.appcycle;
 
 import android.app.Service;
 import android.content.Intent;
+import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
+import android.os.Messenger;
 import android.util.Log;
 
 public class MyServiceIso extends Service {
     private final static String TAG = "myserviceiso";
     private final MyThread mThread;
+    class IncomingHandler extends Handler {
+        @Override
+        public void handleMessage(Message msg) {
+            Log.i(TAG, "handleMessage=" + msg.toString());
+            Bundle bundle = msg.getData();
+            if (bundle!=null){
+                int x = bundle.getInt("counter");
+                Log.i(TAG, "counter=" +x);
+            }
+        }
+    }
+    final Messenger mMessenger = new Messenger(new MyServiceIso.IncomingHandler());
 
     public MyServiceIso() {
         Log.i(TAG, "MyServiceIso");
@@ -18,7 +34,7 @@ public class MyServiceIso extends Service {
     @Override
     public IBinder onBind(Intent intent) {
         Log.i(TAG, "onBind");
-        return null;
+        return mMessenger.getBinder();
     }
 
     public void onCreate() {

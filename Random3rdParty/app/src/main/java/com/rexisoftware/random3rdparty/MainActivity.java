@@ -6,12 +6,12 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
+import android.os.Messenger;
 import android.os.SystemClock;
 import android.util.Log;
 
 import androidx.appcompat.app.AppCompatActivity;
-
-import com.rexisoftware.appcycle.MyServiceAPI;
 
 import java.util.Random;
 
@@ -26,12 +26,12 @@ public class MainActivity extends AppCompatActivity {
         }
     };
     MyThread mThread;
-    private MyServiceAPI mService1;
+    private Messenger mService1;
     private final ServiceConnection mConn1 = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             try {
-                mService1 = (MyServiceAPI) service;
+                mService1 = new Messenger(service);
                 Log.i(TAG, "onServiceConnected1: " + service.toString() + " " + service.getInterfaceDescriptor() + " " + service.isBinderAlive());
             } catch (Throwable e) {
                 Log.i(TAG, e.toString());
@@ -44,12 +44,12 @@ public class MainActivity extends AppCompatActivity {
             mService1 = null;
         }
     };
-    private MyServiceAPI mService2;
+    private Messenger mService2;
     private final ServiceConnection mConn2 = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             try {
-                mService2 = (MyServiceAPI) service;
+                mService2 = new Messenger(service);
                 Log.i(TAG, "onServiceConnected2: " + service.toString() + " " + service.getInterfaceDescriptor() + " " + service.isBinderAlive());
             } catch (Throwable e) {
                 Log.i(TAG, e.toString());
@@ -94,12 +94,20 @@ public class MainActivity extends AppCompatActivity {
         b = getApplicationContext().bindService(i, mConn2, BIND_AUTO_CREATE);
         Log.i(TAG, "callbackImpl2: " + b);
         try {
-            mService1.report("" + x);
+            Message msg = Message.obtain();
+            Bundle bundle = new Bundle();
+            bundle.putInt("counter", x);
+            msg.setData(bundle);
+            mService1.send(msg);
         } catch (Throwable t) {
             Log.i(TAG, "callbackImpl1: " + t);
         }
         try {
-            mService2.report("" + x);
+            Message msg = Message.obtain();
+            Bundle bundle = new Bundle();
+            bundle.putInt("counter", x);
+            msg.setData(bundle);
+            mService2.send(msg);
         } catch (Throwable t) {
             Log.i(TAG, "callbackImpl2: " + t);
         }
